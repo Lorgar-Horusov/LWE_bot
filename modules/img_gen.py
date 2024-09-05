@@ -3,7 +3,6 @@ from interactions import Extension, StringSelectMenu, \
     Modal, ParagraphText, SlashContext, slash_command, ModalContext, Embed
 from interactions.client.errors import HTTPException
 from interactions.api.events import Component
-from interactions.client.utils.formatting import spoiler
 import random
 import re
 from util.image_generation import Model, img_gen_prodia
@@ -18,10 +17,10 @@ def nsfw_checker(data):
         'vagina', 'penis', 'butt', 'fuck', 'suck', 'hardcore', 'softcore',
         'dildo', 'vibrator', 'bukkake', 'rape', 'swinger', 'brothel',
         'escort', 'nude', 'jizz', 'clit', 'nipple', 'fisting', 'shemale',
-        'transgender', 'orgasm', 'kink', 'anal', 'paedophile', 'groping'
+        'transgender', 'orgasm', 'kink', 'anal', 'paedophile', 'groping', 'public indecency'
     ]
     for words in nsfw_words:
-        if re.search(rf'\b{words}\b', data, re.IGNORECASE):
+        if re.search(rf'\b{re.escape(words)}\b', data, re.IGNORECASE):
             return True
     return False
 
@@ -39,7 +38,7 @@ class ImageGeneration(Extension):
     def __init__(self, client):
         self.client = client
 
-    @slash_command()
+    @slash_command(description='image generation')
     async def image_generation(self, ctx: SlashContext):
         try:
             my_modal = Modal(
@@ -62,13 +61,17 @@ class ImageGeneration(Extension):
         except HTTPException:
             return None
         try:
-            nsfw = nsfw_checker(prompt)
             used_component: Component = await ctx.bot.wait_for_component(components=components)
             model = used_component.ctx.values[0]
             components.disabled = True
             await ctx.delete(message)
-            working_message = await ctx.send(content='Generating', ephemeral=True)
 
+            nsfw = nsfw_checker(prompt)
+            if nsfw:
+                if not ctx.channel.nsfw:
+                    return await ctx.send(content='go to horny jail, you little succubus')
+
+            working_message = await ctx.send(content='Generating', ephemeral=True)
             img = await img_gen_prodia(
                 prompt=prompt,
                 model=model,
@@ -76,11 +79,7 @@ class ImageGeneration(Extension):
                 seed=random.randint(1, 100_000),
                 neg=None)
 
-            if nsfw:
-                img_photo = interactions.File(file=img, file_name='image.png', description=prompt)
-                prompt = spoiler(prompt)
-            else:
-                img_photo = interactions.File(file=img, file_name='image.png', description=prompt)
+            img_photo = interactions.File(file=img, file_name='image.png', description=prompt)
 
             embed = Embed(
                 title='Image generation',

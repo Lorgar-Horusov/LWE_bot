@@ -9,7 +9,6 @@ import keyring
 from enum import Enum
 from colorama import Fore, Style, just_fix_windows_console
 
-from gradio_client import Client
 
 just_fix_windows_console()
 CHAT_GPT_TOKEN = keyring.get_password('discord_bot', 'token_chatGPT')
@@ -18,25 +17,6 @@ if CHAT_GPT_TOKEN is None:
     keyring.set_password('discord_bot', 'token_chatGPT', CHAT_GPT_TOKEN)
     CHAT_GPT_TOKEN = keyring.get_password('discord_bot', 'token_chatGPT')
 client = OpenAI(base_url='https://api.naga.ac/v1', api_key=CHAT_GPT_TOKEN)
-
-
-def img_gen_flux(promt):
-    start_time = time.time()
-    client = Client("markury/FLUX.1-dev-LoRA")
-    result = client.predict(
-        prompt=promt,
-        lora_model="",
-        seed=0,
-        randomize_seed=True,
-        width=1024,
-        height=1024,
-        guidance_scale=3.5,
-        num_inference_steps=28,
-        api_name="/infer"
-    )
-    stop_time = time.time()
-    print(f'Time {round((stop_time - start_time), 2)} sec')
-    print(result)
 
 
 def img_gen_NAGA(promt):
