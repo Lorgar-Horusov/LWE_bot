@@ -1,21 +1,20 @@
-import json
+import yaml
 from pathlib import Path
 from colorama import just_fix_windows_console, Fore
 import interactions
-
 
 just_fix_windows_console()
 
 
 def load_config():
-    config_file = 'modules.json'
+    config_file = 'modules.yaml'
     with open(config_file, 'r') as f:
-        return json.load(f)
+        return yaml.safe_load(f)
 
 
 def save_config(config):
-    with open('modules.json', 'w') as f:
-        json.dump(config, f, indent=4)
+    with open('modules.yaml', 'w') as f:
+        yaml.dump(config, f, default_flow_style=False)
 
 
 def update_config(module, status=True):
@@ -34,12 +33,13 @@ def add_new_modules():
         if module not in _config:
             _config[module] = True
             new_modules = True
-            print(f'[>>] Найден новый модуль: {Fore.GREEN}"{module}"{Fore.RESET}. Добавлен в конфигурацию JSON.')
+            print(
+                f'{Fore.BLUE}[>>]{Fore.GREEN} Найден новый модуль: {Fore.CYAN}"{module}"{Fore.GREEN}. Добавлен в конфигурацию YAML.{Fore.RESET}')
     if new_modules:
         save_config(_config)
-        print(f'[>>] Конфигурация JSON обновлена.')
+        print(f'{Fore.BLUE}[>>]{Fore.GREEN}Конфигурация YAML обновлена.{Fore.RESET}')
     else:
-        print(f'[>>] Новых модулей не найдено.')
+        print(f'{Fore.BLUE}[>>]{Fore.GREEN}Новых модулей не найдено.{Fore.RESET}')
 
 
 def load_module(client: interactions.Client):
@@ -47,10 +47,21 @@ def load_module(client: interactions.Client):
     for module in _config:
         if _config.get(module, False):
             client.load_extension(f'modules.{module}')
-            print(f'[>>]Загружен модуль: {Fore.CYAN}"{module}"{Fore.RESET}')
+            print(f'{Fore.BLUE}[>>]{Fore.GREEN} Загружен модуль: {Fore.CYAN}"{module}"{Fore.RESET}')
         else:
-            print(f'[>>]Модуль {Fore.CYAN}"{module}"{Fore.RESET} отключен в конфигурации JSON.')
+            print(
+                f'{Fore.BLUE}[>>]{Fore.RED} Модуль: {Fore.CYAN}"{module}"{Fore.RED} отключен в конфигурациях {Fore.RESET}')
+
+
+def test_load() -> None:
+    _config = load_config()
+    for module in _config:
+        if _config.get(module, False):
+            print(f'{Fore.BLUE}[>>]{Fore.GREEN} Загружен модуль: {Fore.CYAN}"{module}"{Fore.RESET}')
+        else:
+            print(
+                f'{Fore.BLUE}[>>]{Fore.RED} Модуль: {Fore.CYAN}"{module}"{Fore.RED} отключен в конфигурации YAML. {Fore.RESET}')
 
 
 if __name__ == '__main__':
-    pass
+    add_new_modules()

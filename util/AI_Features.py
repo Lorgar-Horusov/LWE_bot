@@ -1,9 +1,8 @@
-import time
-from os import times
-
 from openai import OpenAI
 import asyncio
 import keyring
+import tempfile
+import io, os
 
 CHAT_GPT_TOKEN = keyring.get_password('discord_bot', 'token_chatGPT')
 if CHAT_GPT_TOKEN is None:
@@ -21,23 +20,31 @@ async def chat_gpt(prompt: str):
     return response.choices[0].message.content
 
 
-def moderation(text: str):
-    response = client.moderations.create(input=text, model='text-moderation-latest')
-    print(response.results)
-    return response.results[0]
+async def speach_to_text(audio_data: io.BytesIO) -> str:
+    audio_data.seek(0)
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.ogg') as temp_file:
+        temp_file.write(audio_data.read())
+        temp_file.flush()  # Убедимся, что данные записаны в файл
+        temp_file_name = temp_file.name  # Сохраняем имя файла
+    try:
+        with open(temp_file_name, 'rb') as audio_file:
+            transcription = client.audio.transcriptions.create(
+                model="whisper-large",
+                file=audio_file
+            )
+            print(transcription.text)
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    finally:
+        # Удаляем временный файл
+        os.remove(temp_file_name)
+    text = transcription.text
+    return text
 
 
 async def main():
-    text = '''на днях бомбануло
-
-тот случай когда ты еблан берущий чужие вещи без спроса и при этом не знаешь физику и режешь чужим ножом 20килограмовый замороженный в лед куб слив.масла
-
-самое охуенное тут то что нож был подарком близкого друга а это уже не возместить
-
-не берите чужое чуваки'''
-    print('Rus')
-    moderation(text)
-
+    await speach_to_text()
 
 
 if __name__ == '__main__':
