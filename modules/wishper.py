@@ -1,4 +1,4 @@
-from interactions import Extension, listen, Typing
+from interactions import Extension, listen
 from interactions.api.events import MessageCreate
 import io
 import aiohttp

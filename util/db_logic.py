@@ -53,20 +53,28 @@ class ChatLogger():
                         conn.commit()
 
     def message_deletion_logger(self, autor, message, server_id):
-        self._check_and_delete_old_log('Deleted_messages')
-        with sqlite3.connect(self.db_path) as conn:
-            cursor = conn.cursor()
-            cursor.execute("INSERT INTO deleted_messages (autor, message, deletion_data, server_id) VALUES (?, ?, ?, ?)",
-                           (autor, message, datetime.datetime.now().strftime('%d-%m-%Y'), server_id))
-            conn.commit()
+        try:
+            self._check_and_delete_old_log('deleted_messages')
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute("INSERT INTO deleted_messages (autor, message, deletion_data, server_id) VALUES (?, ?, ?, ?)",
+                               (autor, message, datetime.datetime.now().strftime('%d-%m-%Y'), server_id))
+                conn.commit()
+                print('Log saved')
+        except Exception as e:
+            print(f'Error in message_deletion_logger: {e}')
 
     def message_edition_logger(self, autor, original_message, edited_message, server_id):
-        self._check_and_delete_old_log('Edited_messages')
-        with sqlite3.connect(self.db_path) as conn:
-            cursor = conn.cursor()
-            cursor.execute("INSERT INTO edited_messages (autor, original_message, edited_message, edited_date, server_id) VALUES (?, ?, ?, ?, ?)",
-                           (autor, original_message, edited_message, datetime.datetime.now().strftime('%d-%m-%Y'), server_id))
-            conn.commit()
+        try:
+            self._check_and_delete_old_log('edited_messages')
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute("INSERT INTO edited_messages (autor, original_message, edited_message, edited_date, server_id) VALUES (?, ?, ?, ?, ?)",
+                               (autor, original_message, edited_message, datetime.datetime.now().strftime('%d-%m-%Y'), server_id))
+                conn.commit()
+                print('Log saved')
+        except Exception as e:
+            print(f'Error in message_edition_logger: {e}')
 
     def get_logs(self, table_name, server_id):
         with sqlite3.connect(self.db_path) as conn:

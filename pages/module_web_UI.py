@@ -2,21 +2,26 @@ import streamlit as st
 import importlib
 import main
 from load_modules import load_config, save_config
+import pandas as pd
 
+st.title('Module Config')
 
-st.title('Module config')
 module_config = load_config()
-updated_config = {}
 
-for module, status in module_config.items():
-    updated_config[module] = st.checkbox(f'Modules: {module}', value=status)
+modules = []
+status = []
 
-if st.button('Save'):
+for module, stat in module_config.items():
+    modules.append(module)
+    status.append(stat)
+
+data_fr = pd.DataFrame({'Modules': modules, 'Status': status})
+
+updated_data = st.data_editor(data_fr, use_container_width=True, hide_index=True, disabled=['Modules'])
+
+if st.button('Reload Bot', disabled=False):
+    updated_config = {row['Modules']: row['Status'] for _, row in updated_data.iterrows()}
     save_config(updated_config)
-    st.success('Config updated successfully!')
-
-if st.button('Reload bot', disabled=False):
     importlib.reload(main)
     st.info('Bot is reloading...')
-    # main.stop()
     main.start()

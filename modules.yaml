@@ -2,6 +2,7 @@ book_search: true
 chat_gpt: true
 e621_search: true
 img_gen: true
+logger: true
 manga: true
-music: true
+music: false
 wishper: true
