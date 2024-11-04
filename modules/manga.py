@@ -2,7 +2,7 @@ from interactions import Extension, Embed, SlashContext, slash_command, slash_op
 from interactions.ext.paginators import Paginator
 
 from util.lib_search_API import search_manga
-
+from load_modules  import load_config
 
 def embed_generator(manga_list):
     embeds = []
@@ -28,6 +28,10 @@ class GetManga(Extension):
     @slash_command(name="manga", description="Get a manga from Mangalib")
     @slash_option(name="manga", description="Manga name", required=True, opt_type=3)
     async def getmanga(self, ctx: SlashContext, manga: str):
+        config = load_config()
+        if not config.get('manga', False):
+            return await ctx.send("manga module is disabled")
+
         wait_massage = await ctx.send(content="Searching...", silent=True)
         manga = await search_manga(manga)
         if not manga:

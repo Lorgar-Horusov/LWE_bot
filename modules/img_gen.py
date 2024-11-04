@@ -6,7 +6,7 @@ from interactions.api.events import Component
 import random
 import re
 from util.image_generation import Model, img_gen_prodia
-
+from load_modules import load_config
 
 def nsfw_checker(data):
     nsfw_words = [
@@ -40,6 +40,9 @@ class ImageGeneration(Extension):
 
     @slash_command(description='image generation')
     async def image_generation(self, ctx: SlashContext):
+        config = load_config()
+        if not config.get('img_gen', False):
+            return await ctx.send("img_gen module is disabled")
         try:
             my_modal = Modal(
                 ParagraphText(label="Enter a prompt", custom_id="long"),

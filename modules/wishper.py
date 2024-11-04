@@ -2,7 +2,7 @@ from interactions import Extension, listen
 from interactions.api.events import MessageCreate
 import io
 import aiohttp
-
+from load_modules import load_config
 from util.AI_Features import speach_to_text
 
 class voice_to_text(Extension):
@@ -11,6 +11,9 @@ class voice_to_text(Extension):
 
     @listen(MessageCreate)
     async def on_message_create(self, event: MessageCreate):
+        config = load_config()
+        if not config.get('wishper', False):
+            return
         if event.message.author.bot:
             return
 

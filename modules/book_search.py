@@ -1,6 +1,7 @@
 from interactions import Extension
 from interactions import slash_command, SlashContext, slash_option
 from util.flibusta_api import search_books
+from load_modules import load_config
 
 
 class Search(Extension):
@@ -23,6 +24,9 @@ class Search(Extension):
         opt_type=4
     )
     async def fb_search(self, ctx: SlashContext, book_name: str, count: int = 4):
+        config = load_config()
+        if not config.get('book_search', False):
+            return await ctx.send("book_search module is disabled")
         await ctx.defer()
         try:
             books = search_books(book_name, count)

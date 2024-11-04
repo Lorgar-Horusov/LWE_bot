@@ -2,7 +2,7 @@ from interactions import Extension
 from interactions import Modal, ParagraphText, SlashContext, slash_command, ModalContext, Typing
 
 from util.AI_Features import chat_gpt
-
+from load_modules import load_config
 
 class ChatGPT(Extension):
     def __init__(self, client):
@@ -10,6 +10,9 @@ class ChatGPT(Extension):
 
     @slash_command()
     async def chatgpt(self, ctx: SlashContext):
+        config = load_config()
+        if not config.get('chat_gpt', False):
+            return await ctx.send("chat_gpt module is disabled")
         my_modal = Modal(
             ParagraphText(label="Enter a query", custom_id="long_text"),
             title="My Modal",
