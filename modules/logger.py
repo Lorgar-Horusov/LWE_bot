@@ -26,12 +26,10 @@ class DiscordLogger(Extension):
 
     @listen(MessageUpdate)
     async def on_message_update(self, event):
-        # Проверка на наличие обеих версий сообщения
         if event.before is None or event.after is None:
             print('Error: event.before or event.after is None')
             return
 
-        # Проверка, является ли автор ботом
         if event.before.author.bot:
             return
 
@@ -39,7 +37,6 @@ class DiscordLogger(Extension):
         original_message = event.before.content
         edited_message = event.after.content
 
-        # Проверка на пустые сообщения
         if original_message and edited_message:
             self.chat_logger.message_edition_logger(
                 autor=str(user),

@@ -12,10 +12,11 @@ if CHAT_GPT_TOKEN is None:
 client = OpenAI(base_url='https://api.naga.ac/v1', api_key=CHAT_GPT_TOKEN)
 
 
-async def chat_gpt(prompt: str):
+async def chat_gpt(prompt: str, model: str, tokens: int):
     response = client.chat.completions.create(
-        model='gpt-3.5-turbo',
-        messages=[{'role': 'user', 'content': prompt}]
+        model=model,
+        messages=[{'role': 'user', 'content': prompt}],
+        max_tokens=tokens
     )
     return response.choices[0].message.content
 
@@ -25,8 +26,8 @@ async def speach_to_text(audio_data: io.BytesIO) -> str:
 
     with tempfile.NamedTemporaryFile(delete=False, suffix='.ogg') as temp_file:
         temp_file.write(audio_data.read())
-        temp_file.flush()  # Убедимся, что данные записаны в файл
-        temp_file_name = temp_file.name  # Сохраняем имя файла
+        temp_file.flush()
+        temp_file_name = temp_file.name
     try:
         with open(temp_file_name, 'rb') as audio_file:
             transcription = client.audio.transcriptions.create(
@@ -44,7 +45,8 @@ async def speach_to_text(audio_data: io.BytesIO) -> str:
 
 
 async def main():
-    await speach_to_text()
+    respons = await chat_gpt('Привет', 'llama-3.2-90b-vision-instruct', 100)
+    print(respons)
 
 
 if __name__ == '__main__':

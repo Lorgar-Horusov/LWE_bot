@@ -1,8 +1,22 @@
-book_search: true
-chat_gpt: true
-e621_search: true
-img_gen: true
-logger: true
-manga: true
-music: false
-wishper: true
+modules:
+  book_search:
+    default_search_count: 3
+    enabled: true
+  chat_gpt:
+    enabled: true
+    max_tokens: 1000
+    model: llama-3.2-90b-vision-instruct
+  e621_search:
+    enabled: true
+  img_gen:
+    NSFW_filter: false
+    enabled: true
+  logger:
+    enabled: true
+  manga:
+    default_search_count: 3
+    enabled: true
+  music:
+    enabled: true
+  wishper:
+    enabled: true

@@ -8,6 +8,7 @@ import re
 from util.image_generation import Model, img_gen_prodia
 from load_modules import load_config
 
+
 def nsfw_checker(data):
     nsfw_words = [
         'nsfw', 'naked', 'undress', 'hentai', 'porn', 'xxx',
@@ -41,8 +42,10 @@ class ImageGeneration(Extension):
     @slash_command(description='image generation')
     async def image_generation(self, ctx: SlashContext):
         config = load_config()
-        if not config.get('img_gen', False):
-            return await ctx.send("img_gen module is disabled")
+        if config['img_gen']['enabled']:
+            nsfw_filter = config['img_gen']['NSFW_filter']
+        else:
+            return await ctx.send("This command is currently disabled.", ephemeral=True)
         try:
             my_modal = Modal(
                 ParagraphText(label="Enter a prompt", custom_id="long"),
@@ -70,7 +73,7 @@ class ImageGeneration(Extension):
             await ctx.delete(message)
 
             nsfw = nsfw_checker(prompt)
-            if nsfw:
+            if nsfw and nsfw_filter:
                 if not ctx.channel.nsfw:
                     return await ctx.send(content='go to horny jail, you little succubus')
 

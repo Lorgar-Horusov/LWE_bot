@@ -74,7 +74,7 @@ class Music(Extension):
     async def play(self, ctx: SlashContext, query: str):
         await ctx.defer()
         config = load_config()
-        if not config.get('music', False):
+        if not config['music']['enabled']:
             return await ctx.send("Music module is disabled")
 
         voice_state = ctx.author.voice

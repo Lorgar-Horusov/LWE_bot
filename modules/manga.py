@@ -27,13 +27,17 @@ class GetManga(Extension):
 
     @slash_command(name="manga", description="Get a manga from Mangalib")
     @slash_option(name="manga", description="Manga name", required=True, opt_type=3)
-    async def getmanga(self, ctx: SlashContext, manga: str):
+    @slash_option(name="count", description="Manga count", required=False, opt_type=4)
+    async def getmanga(self, ctx: SlashContext, manga: str, count: int = None):
         config = load_config()
-        if not config.get('manga', False):
-            return await ctx.send("manga module is disabled")
+        if config['manga']['enabled']:
+            if count is None:
+                count = config['book_search']['default_search_count']
+        else:
+            return await ctx.send("This command is currently disabled.", ephemeral=True)
 
         wait_massage = await ctx.send(content="Searching...", silent=True)
-        manga = await search_manga(manga)
+        manga = await search_manga(manga, count=count)
         if not manga:
             return await ctx.send(content="No manga found", silent=True)
         manga_embeds = embed_generator(manga)

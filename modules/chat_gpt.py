@@ -11,8 +11,12 @@ class ChatGPT(Extension):
     @slash_command()
     async def chatgpt(self, ctx: SlashContext):
         config = load_config()
-        if not config.get('chat_gpt', False):
-            return await ctx.send("chat_gpt module is disabled")
+        if config['chat_gpt']['enabled']:
+            model = config['chat_gpt']['model']
+            tokens = config['chat_gpt']['max_tokens']
+        else:
+            return await ctx.send("This command is currently disabled.", ephemeral=True)
+
         my_modal = Modal(
             ParagraphText(label="Enter a query", custom_id="long_text"),
             title="My Modal",
@@ -24,5 +28,5 @@ class ChatGPT(Extension):
         long_text = modal_ctx.responses["long_text"]
         async with Typing(ctx.channel):
             response_msg = await modal_ctx.send('Запрос принят ожидайте ответ', ephemeral=True)
-            answer = await chat_gpt(long_text)
+            answer = await chat_gpt(long_text, model, tokens)
         await ctx.edit(message=response_msg.id, content=answer)

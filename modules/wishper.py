@@ -5,6 +5,7 @@ import aiohttp
 from load_modules import load_config
 from util.AI_Features import speach_to_text
 
+
 class voice_to_text(Extension):
     def __init__(self, client):
         self.client = client
@@ -12,7 +13,7 @@ class voice_to_text(Extension):
     @listen(MessageCreate)
     async def on_message_create(self, event: MessageCreate):
         config = load_config()
-        if not config.get('wishper', False):
+        if config['wishper']['enabled']:
             return
         if event.message.author.bot:
             return
@@ -30,5 +31,3 @@ class voice_to_text(Extension):
                                 await holder.edit(content=f"Transcribed text: {text}")
                             else:
                                 await holder.edit(content="Failed to download the audio file.")
-
-

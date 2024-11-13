@@ -19,14 +19,18 @@ class Search(Extension):
     )
     @slash_option(
         name="count",
-        description="Number of results to return (default: 4)",
+        description="Number of results to return ",
         required=False,
         opt_type=4
     )
-    async def fb_search(self, ctx: SlashContext, book_name: str, count: int = 4):
+    async def fb_search(self, ctx: SlashContext, book_name: str, count: int = None):
         config = load_config()
-        if not config.get('book_search', False):
-            return await ctx.send("book_search module is disabled")
+        if config['book_search']['enabled']:
+            if count is None:
+                count = config['book_search']['default_search_count']
+        else:
+            return await ctx.send("This command is currently disabled.", ephemeral=True)
+
         await ctx.defer()
         try:
             books = search_books(book_name, count)

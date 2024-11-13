@@ -2,26 +2,43 @@ import streamlit as st
 import importlib
 import main
 from load_modules import load_config, save_config
-import pandas as pd
 
-st.title('Module Config')
+# Установим заголовок страницы
+st.title('Настройки модулей бота')
 
+# Загружаем текущую конфигурацию модулей
 module_config = load_config()
 
-modules = []
-status = []
+# Проходим по всем модулям в конфигурации и создаем интерфейс
+for module, config in module_config.items():
+    with st.expander(f"Настройки для {module}"):
+        # Чекбокс для включения/выключения модуля
+        new_status = st.checkbox(f"Включить {module}", value=config['enabled'])
+        module_config[module]['enabled'] = new_status
 
-for module, stat in module_config.items():
-    modules.append(module)
-    status.append(stat)
+        # Динамически создаем поля для параметров модуля
+        for param, value in config.items():
+            if param != 'enabled':  # Игнорируем поле 'enabled', так как оно уже обработано
+                if isinstance(value, bool):
+                    # Для boolean параметров отображаем checkbox
+                    new_value = st.checkbox(f"{param} для {module}", value=value)
+                elif isinstance(value, int):
+                    # Для числовых параметров отображаем number_input
+                    new_value = st.number_input(f"{param} для {module}", value=value, min_value=1)
+                elif isinstance(value, str):
+                    # Для строковых параметров отображаем text_input
+                    new_value = st.text_input(f"{param} для {module}", value=value)
+                else:
+                    new_value = value  # Если тип не распознан, просто оставляем значение
 
-data_fr = pd.DataFrame({'Modules': modules, 'Status': status})
+                # Обновляем значение в конфигурации
+                module_config[module][param] = new_value
 
-updated_data = st.data_editor(data_fr, use_container_width=True, hide_index=True, disabled=['Modules'])
+# Кнопка для сохранения настроек
+if st.button('Сохранить настройки'):
+    save_config(module_config)  # Сохраняем конфигурацию в файл
+    importlib.reload(main)  # Перезагружаем бота
+    st.success('Настройки успешно обновлены!')
 
-if st.button('Reload Bot', disabled=False):
-    updated_config = {row['Modules']: row['Status'] for _, row in updated_data.iterrows()}
-    save_config(updated_config)
-    importlib.reload(main)
-    st.info('Bot is reloading...')
+    # Перезапуск бота
     main.start()

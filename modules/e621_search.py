@@ -4,13 +4,15 @@ from interactions import Extension, slash_command, SlashContext, slash_option, E
 from util.e621_search import search_e621 as e621
 from load_modules import load_config
 
+
 class E621Search(Extension):
     @slash_command(name="e621", description="Search e621 for media content", nsfw=True)
     @slash_option(name="tags", description="The tags to search for", required=False, opt_type=3)
-    async def e621_find(self, ctx: SlashContext, tags= ''):
+    async def e621_find(self, ctx: SlashContext, tags=''):
         config = load_config()
-        if not config.get('e621_search', False):
-            return await ctx.send("e621_search module is disabled")
+        if not config['e621_search']['enabled']:
+            return await ctx.send("This command is currently disabled.", ephemeral=True)
+
         if not ctx.channel.nsfw:
             await ctx.send("This content can only be sent in an NSFW channel.")
             return
