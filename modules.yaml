@@ -1,22 +1,33 @@
 modules:
   book_search:
-    default_search_count: 3
     enabled: true
+    default_search_count: 3
+
   chat_gpt:
     enabled: true
     max_tokens: 1000
     model: llama-3.2-90b-vision-instruct
+
   e621_search:
     enabled: true
+
   img_gen:
-    NSFW_filter: false
     enabled: true
+    NSFW_filter: false
+
   logger:
     enabled: true
+
   manga:
+    enabled: true
     default_search_count: 3
-    enabled: true
+
   music:
-    enabled: true
+    enabled: false
+
   wishper:
     enabled: true
+
+  temp_channels:
+    enabled: true
+    time_to_delete: 1

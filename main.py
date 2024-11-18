@@ -16,13 +16,6 @@ async def on_ready():
     print(f"Our latency is {round(client.latency, 2)} ms.")
 
 
-
-@interactions.slash_command(name="hello-world", description='A command that says "hello world!"')
-async def hello_world(ctx: interactions.SlashContext):
-    await ctx.send("hello world!")
-    print("we ran.")
-
-
 def start():
     load_module(client)
     client.start(TOKEN)

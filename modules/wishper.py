@@ -13,7 +13,7 @@ class voice_to_text(Extension):
     @listen(MessageCreate)
     async def on_message_create(self, event: MessageCreate):
         config = load_config()
-        if config['wishper']['enabled']:
+        if config['wishper']['enabled'] is False:
             return
         if event.message.author.bot:
             return
