@@ -4,7 +4,7 @@ from load_modules import load_module
 from tokken_setting import discord_token
 
 client = Client(
-    intents=Intents.DEFAULT | Intents.MESSAGE_CONTENT,
+    intents=Intents.DEFAULT | Intents.MESSAGE_CONTENT | Intents.GUILD_MODERATION,
 )
 
 TOKEN = discord_token()

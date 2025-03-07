@@ -3,6 +3,11 @@ import asyncio
 import keyring
 import tempfile
 import io, os
+from typing import List, Dict
+import json
+import sqlite3
+from numpy import dot
+from numpy.linalg import norm
 
 CHAT_GPT_TOKEN = keyring.get_password('discord_bot', 'token_chatGPT')
 if CHAT_GPT_TOKEN is None:
@@ -10,6 +15,25 @@ if CHAT_GPT_TOKEN is None:
     keyring.set_password('discord_bot', 'token_chatGPT', CHAT_GPT_TOKEN)
     CHAT_GPT_TOKEN = keyring.get_password('discord_bot', 'token_chatGPT')
 client = OpenAI(base_url='https://api.naga.ac/v1', api_key=CHAT_GPT_TOKEN)
+
+
+async def embedding_generate(text: str) -> List[float]:
+    text = text.replace("\n", " ")
+    response = client.embeddings.create(
+        input=[text],
+        model='text-embedding-ada-002',
+    )
+    return response.data[0].embedding
+
+def cosine_similarity(vector1, vector2):
+    return dot(vector1, vector2) / (norm(vector1) * norm(vector2))
+
+
+def need_update(new_embedding: List[float], old_embedding: List[float], threshold: float = 0.8):
+    if old_embedding is None:
+        return True
+    similarity = cosine_similarity(new_embedding, old_embedding)
+    return similarity < threshold
 
 
 async def chat_gpt(prompt: str, model: str, tokens: int):
@@ -45,8 +69,10 @@ async def speach_to_text(audio_data: io.BytesIO) -> str:
 
 
 async def main():
-    respons = await chat_gpt('Привет', 'llama-3.2-90b-vision-instruct', 100)
-    print(respons)
+    # respons = await chat_gpt('Привет', 'llama-3.2-90b-vision-instruct', 100)
+    # print(respons)
+    resp = await embedding_generate('just a lot of letters for a test')
+    print(resp)
 
 
 if __name__ == '__main__':

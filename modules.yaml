@@ -4,7 +4,7 @@ modules:
     default_search_count: 3
 
   chat_gpt:
-    enabled: true
+    enabled: false
     max_tokens: 1000
     model: llama-3.2-90b-vision-instruct
 
@@ -16,18 +16,29 @@ modules:
     NSFW_filter: false
 
   logger:
-    enabled: true
+    enabled: false
 
   manga:
-    enabled: true
+    enabled: false
     default_search_count: 3
 
   music:
-    enabled: false
+    enabled: true
 
   wishper:
-    enabled: true
+    enabled: false
 
   temp_channels:
-    enabled: true
+    enabled: false
     time_to_delete: 1
+
+  reports:
+    enabled: true
+    logs_level: 1
+    time_to_delete: 60
+
+  moderation:
+    enabled: true
+
+  fun:
+    enabled: true
