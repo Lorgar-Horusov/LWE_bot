@@ -2,11 +2,14 @@ import os
 
 import yaml
 from pathlib import Path
-from colorama import just_fix_windows_console, Fore
+
+from rich.console import Console
 import interactions
 from art import tprint
+from time import sleep
+from random import randint
 
-just_fix_windows_console()
+console = Console()
 
 DEFAULT_CONFIG = {
     'enabled': True,
@@ -50,44 +53,45 @@ def add_new_modules():
         if module not in _config:
             _config[module] = DEFAULT_CONFIG.copy()  # Добавляем новый модуль с настройками по умолчанию
             new_modules = True
-            print(
-                f'{Fore.BLUE}[>>]{Fore.GREEN} Найден новый модуль: {Fore.CYAN}"{module}"{Fore.GREEN}. Добавлен в конфигурацию YAML.{Fore.RESET}')
+            console.print(f'[blue][>>>][green] Найден новый модуль:[cyan]\"{module}\"[/cyan]. Добавлен в конфигурацию YAML.')
 
     if new_modules:
         save_config(_config)  # Сохраняем изменения в конфигурации
-        print(f'{Fore.BLUE}[>>]{Fore.GREEN} Конфигурация YAML обновлена.{Fore.RESET}')
+        console.print(f'[blue][>>>][green] Конфигурация YAML обновлена.')
     else:
-        print(f'{Fore.BLUE}[>>]{Fore.GREEN} Новых модулей не найдено.{Fore.RESET}')
+        console.print(f'[blue][=!=][yellow] Новых модулей не найдено.')
 
 
 def load_module(client: interactions.Client):
     clear()
     _config = load_config()
     tprint("LWE-BOT", font="tarty1")
-    for module, settings in _config.items():
-        if settings.get('enabled', False):
-            client.load_extension(f'modules.{module}')
-            print(f'{Fore.BLUE}[>>]{Fore.GREEN} Загружен модуль: {Fore.CYAN}"{module}"{Fore.RESET}')
-            for setting, value in settings.items():
-                if setting != "enabled":
-                    print(f"{Fore.BLUE}  -> {Fore.YELLOW}{setting}: {Fore.CYAN}{value}{Fore.RESET}")
-        else:
-            print(
-                f'{Fore.BLUE}[>>]{Fore.RED} Модуль: {Fore.CYAN}"{module}"{Fore.RED} отключен в конфигурациях {Fore.RESET}')
+    with console.status("[bold]Loading", spinner='growVertical'):
+        for module, settings in _config.items():
+            if settings.get('enabled', False):
+                client.load_extension(f'modules.{module}')
+                console.print(f'[blue][>>>][green] Загружен модуль: [cyan]\"{module}"')
+                for setting, value in settings.items():
+                    if setting != "enabled":
+                        console.print(f"[blue] |->| [yellow]{setting}: [cyan]{value}")
+            else:
+                console.print(f'[blue][=!=][red] Модуль: [cyan]\"{module}\"[red] отключен в конфигурациях')
 
 
 def test_load() -> None:
     _config = load_config()
-    for module, settings in _config.items():
-        if settings.get('enabled', False):
-            print(f'{Fore.BLUE}[>>]{Fore.GREEN} Загружен модуль: {Fore.CYAN}"{module}"{Fore.RESET}')
-            for setting, value in settings.items():
-                if setting != "enabled":
-                    print(f"{Fore.BLUE}  -> {Fore.YELLOW}{setting}: {Fore.CYAN}{value}{Fore.RESET}")
-        else:
-            print(
-                f'{Fore.BLUE}[>>]{Fore.RED} Модуль: {Fore.CYAN}"{module}"{Fore.RED} отключен в конфигурации YAML. {Fore.RESET}')
+    with console.status("[bold]Loading", spinner='growVertical'):
+        for module, settings in _config.items():
+            if settings.get('enabled', False):
+                console.print(f'[blue][>>>][green] Загружен модуль: [cyan]\"{module}\"')
+                for setting, value in settings.items():
+                    if setting != "enabled":
+                        console.print(f"[blue] |->| [yellow]{setting}: [cyan]{value}")
+                        sleep(randint(1, 3))
+            else:
+                console.print(f'[blue][=!=][red] Модуль: [cyan]\"{module}\"[red] отключен в конфигурациях')
+                sleep(randint(1, 3))
 
 
 if __name__ == '__main__':
-    test_load()
+    add_new_modules()

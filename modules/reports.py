@@ -13,6 +13,11 @@ from interactions.models.discord.enums import Permissions, ChannelType
 import io
 from util.attorney import MilesEdgeworth
 import asyncio
+from util.db_logic import ModerationDatabase
+from rich.console import Console
+import json
+
+console = Console()
 
 
 def convert_seconds(seconds):
@@ -203,7 +208,7 @@ class Reports(Extension):
         case_channel = await guild.create_channel(
             name=case_id,
             channel_type=ChannelType.GUILD_TEXT.value,
-            permission_overwrites=overwrites
+            permission_overwrites=overwrites,
         )
 
         # Collect messages between the reporter and reported user
@@ -229,23 +234,29 @@ class Reports(Extension):
         await case_channel.send(files=file)
         embed_message_send = await case_channel.send(embed=embed_message)
         message_id = embed_message_send.id
-        ai_analysis = self.attorney.judge(reporter_id, reported_id, file_content, reason)
+        try:
+            mdb = ModerationDatabase()
+            warns = mdb.get_warns(reported_id, ctx.guild.name)
+            warns = json.dumps(warns, ensure_ascii=False, indent=2)
+            ai_analysis = self.attorney.judge(reporter_id, reported_id, file_content, reason, warns)
 
-        embed_message_new = report_embed(
-            case_id,
-            ctx.author.id,
-            reported_user.id,
-            reason,
-            datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            ai_analysis
-        )
-        message_to_edit = await case_channel.fetch_message(message_id)
-        await message_to_edit.edit(embed=embed_message_new)
+            embed_message_new = report_embed(
+                case_id,
+                ctx.author.id,
+                reported_user.id,
+                reason,
+                datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                ai_analysis
+            )
+            message_to_edit = await case_channel.fetch_message(message_id)
+            await message_to_edit.edit(embed=embed_message_new)
 
-        await ctx.edit(
-            message=temp_message,
-            content=f"Ваша жалоба на {reported_user.username} отправлена. ID жалобы: {case_id}",
-        )
+            await ctx.edit(
+                message=temp_message,
+                content=f"Ваша жалоба на {reported_user.username} отправлена. ID жалобы: {case_id}",
+            )
+        except  Exception as e:
+            console.print_exception(show_locals=True)
 
     @slash_command(
         name="close_case",

@@ -3,12 +3,13 @@ import asyncio
 import keyring
 import tempfile
 import io, os
-from typing import List, Dict
-import json
-import sqlite3
+from typing import List
+from rich.console import Console
+from rich.markdown import Markdown
 from numpy import dot
 from numpy.linalg import norm
 
+console = Console()
 CHAT_GPT_TOKEN = keyring.get_password('discord_bot', 'token_chatGPT')
 if CHAT_GPT_TOKEN is None:
     CHAT_GPT_TOKEN = input('Write Token: ')
@@ -37,13 +38,16 @@ def need_update(new_embedding: List[float], old_embedding: List[float], threshol
 
 
 async def chat_gpt(prompt: str, model: str, tokens: int):
-    response = client.chat.completions.create(
-        model=model,
-        messages=[{'role': 'user', 'content': prompt}],
-        max_tokens=tokens
-    )
-    return response.choices[0].message.content
-
+    try:
+        response = client.chat.completions.create(
+            model=model,
+            messages=[{'role': 'user', 'content': prompt}],
+            max_tokens=tokens
+        )
+        return response.choices[0].message.content
+    except Exception:
+        console.print_exception(show_locals=True)
+        return None
 
 async def speach_to_text(audio_data: io.BytesIO) -> str:
     audio_data.seek(0)
@@ -59,8 +63,8 @@ async def speach_to_text(audio_data: io.BytesIO) -> str:
                 file=audio_file
             )
             print(transcription.text)
-    except Exception as e:
-        print(f"An error occurred: {e}")
+    except Exception:
+        console.print_exception(show_locals=True)
     finally:
         # Удаляем временный файл
         os.remove(temp_file_name)
@@ -69,10 +73,9 @@ async def speach_to_text(audio_data: io.BytesIO) -> str:
 
 
 async def main():
-    # respons = await chat_gpt('Привет', 'llama-3.2-90b-vision-instruct', 100)
-    # print(respons)
-    resp = await embedding_generate('just a lot of letters for a test')
-    print(resp)
+    respons = await chat_gpt('Привет, Дай небольшой скрипт на пайтон для построчного вывода текста', 'llama-3.3-70b-instruct', 100)
+    console.print(Markdown(respons))
+
 
 
 if __name__ == '__main__':

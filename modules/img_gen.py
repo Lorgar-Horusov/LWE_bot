@@ -1,13 +1,15 @@
 import interactions
-from interactions import Extension, StringSelectMenu, \
-    Modal, ParagraphText, SlashContext, slash_command, ModalContext, Embed
-from interactions.client.errors import HTTPException
-from interactions.api.events import Component
-import random
+from interactions import (
+    Extension,
+    SlashContext,
+    slash_command,
+    Embed)
 import re
-from util.image_generation import Model, img_gen_prodia
+from util.image_generation import ImageGenerator
 from load_modules import load_config
+from rich.console import Console
 
+console = Console()
 
 def nsfw_checker(data):
     nsfw_words = [
@@ -26,85 +28,42 @@ def nsfw_checker(data):
     return False
 
 
-def load_models():
-    model = []
-    for models in Model:
-        value = models.value
-        _, display_name, _ = value
-        model.append(display_name)
-    return model
-
-
 class ImageGeneration(Extension):
     def __init__(self, client):
         self.client = client
+        self.generator = ImageGenerator()
 
-    @slash_command(description='image generation')
-    async def image_generation(self, ctx: SlashContext):
-        config = load_config()
-        if config['img_gen']['enabled']:
-            nsfw_filter = config['img_gen']['NSFW_filter']
-        else:
-            return await ctx.send("This command is currently disabled.", ephemeral=True)
-        try:
-            my_modal = Modal(
-                ParagraphText(label="Enter a prompt", custom_id="long"),
-                title="Image generations",
-                custom_id="my_modal",
-            )
-            await ctx.send_modal(modal=my_modal)
-            modal_ctx: ModalContext = await ctx.bot.wait_for_modal(my_modal)
-            prompt = modal_ctx.responses["long"]
-            models = load_models()
-            components = StringSelectMenu(
-                models,
-                placeholder="choose model",
-                min_values=1,
-                max_values=1,
-                custom_id='model_name'
-            )
-            message = await modal_ctx.send(components=components, ephemeral=True)
-        except HTTPException:
-            return None
-        try:
-            used_component: Component = await ctx.bot.wait_for_component(components=components)
-            model = used_component.ctx.values[0]
-            components.disabled = True
-            await ctx.delete(message)
+    @slash_command(
+        name='image_generation',
+        description='Сгенерировать изображение',
+        options=[
+            {
+                "name": "prompt",
+                "description": "Что сгенерировать",
+                "type": 3,
+                "required": True
+            }
+        ]
+    )
+    async def image_generation(self, ctx: SlashContext, prompt):
+        placeholder_msg = await ctx.send('Generating image')
+        image = await self.generator.generate(prompt)
+        embed = Embed(
+            title="Image Generator",
+            color=0x00ff00,
+        )
+        embed.add_field(
+            name=f"Prompt",
+            value=prompt,
+            inline=False
+        )
+        embed.set_author(
+            name='Legendary Web Enforcer',
+            url='https://github.com/Lorgar-Horusov/LWE_bot',
+            icon_url="https://cdn.discordapp.com/avatars/1269739594736341227/160567261d976bdb1d4bd31745520b77"
+        )
+        file = interactions.File(image, description='Generated Image', file_name='image.png')
+        await ctx.edit(message=placeholder_msg, embed=embed, file=file, content='')
+        return
 
-            nsfw = nsfw_checker(prompt)
-            if nsfw and nsfw_filter:
-                if not ctx.channel.nsfw:
-                    return await ctx.send(content='go to horny jail, you little succubus')
 
-            working_message = await ctx.send(content='Generating', ephemeral=True)
-            img = await img_gen_prodia(
-                prompt=prompt,
-                model=model,
-                sampler="Euler a",
-                seed=random.randint(1, 100_000),
-                neg=None)
-
-            img_photo = interactions.File(file=img, file_name='image.png', description=prompt)
-
-            embed = Embed(
-                title='Image generation',
-                description=prompt,
-                color=0x00ff00,
-            )
-            embed.set_author(
-                name='LWE',
-                icon_url='https://images-ext-1.discordapp.net/external/HbRcL0HMIy6Cy-sSHD29qPKAdKDIkWkWxRKIUftSKjM'
-                         '/https/cdn.discordapp.com/avatars/1269739594736341227/160567261d976bdb1d4bd31745520b77'
-                         '?format=webp'
-            )
-            embed.add_field(
-                name='Model',
-                value=model
-            )
-            await ctx.delete(working_message)
-            await ctx.send(file=img_photo, embed=embed, silent=True)
-        except TimeoutError:
-            components.disabled = True
-            await ctx.edit(message)
-            print("Timed Out!")

@@ -3,7 +3,9 @@ import keyring
 from typing import List, Dict
 import datetime
 from pathlib import Path
+from rich.console import Console
 
+console = Console()
 RULES = r"""
 Общие правила:
 ⟦ 1 ⟧ ⋅ На сервере действуют правила сообщества Discord.
@@ -87,6 +89,7 @@ class MilesEdgeworth:
         self.conversation_text = None
         self.rules = None
         self.reason = None
+        self.warns = None
 
     def _generate_system_prompt(self) -> str:
         if not self.rules:
@@ -94,13 +97,16 @@ class MilesEdgeworth:
         return f"""
     Вы выступаете в качестве беспристрастного эксперта по модерации Discord.
     Истец (ID: {self.reporter_id}) предъявил исковое требование Ответчику (ID: {self.reported_id}) с причиной (f{self.reason}).
-
+    
+    У ответчика имеются следующие предупреждения {self.warns}
+    
     Пожалуйста, предоставьте:
     1. Краткое содержание диалога между пользователями.
     2. Оценку возможных нарушений правил или неадекватного поведения.
     3. Оценку серьезности нарушений (нет, незначительные, умеренные, серьезные).
     Разговор:
     4. Рекомендации к действию со стороны администрации к отношению истцу и\или ответчику
+    5. Являются ли предыдущие предупреждения отягчающими обстоятельствами, если да то какие   
     {self.conversation_text}
 
     Правила сервера:
@@ -129,22 +135,27 @@ class MilesEdgeworth:
 
         return conversation
 
-    def judge(self, reporter_id, reported_id, conversation_text, reason) -> str:
+    def judge(self, reporter_id, reported_id, conversation_text, reason, warns) -> str:
         self.reporter_id = reporter_id
         self.reported_id = reported_id
         self.conversation_text = conversation_text
         self.rules = self.rule_path
         self.reason = reason
-        system_prompt = self._generate_system_prompt()
-        completion = client.chat.completions.create(
-            model=self.model,
-            messages=[
-                {
-                    "role": "system",
-                    "content": system_prompt
-                }
-            ],
-            temperature=0,
-            max_tokens=2048
-        )
-        return completion.choices[0].message.content
+        self.warns = warns
+        try:
+            system_prompt = self._generate_system_prompt()
+            completion = client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": system_prompt
+                    }
+                ],
+                temperature=0,
+                max_tokens=2048
+            )
+            return completion.choices[0].message.content
+        except Exception as e:
+            console.print_exception(show_locals=True)
+            return "Error in judge"

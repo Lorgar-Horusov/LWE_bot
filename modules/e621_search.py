@@ -4,6 +4,8 @@ from interactions import Extension, slash_command, SlashContext, slash_option, E
 from util.e621_search import search_e621 as e621
 from load_modules import load_config
 
+def split_text(text, length):
+    return [text[i:i + length] for i in range(0, len(text), length)]
 
 class E621Search(Extension):
     @slash_command(name="e621", description="Search e621 for media content", nsfw=True)
@@ -18,11 +20,12 @@ class E621Search(Extension):
             return
         message_send = await ctx.send(content='searching UwU')
 
-        media_content, tag, ext = await e621(tags)
+        media_content, tag, ext = await e621(f'{tags}')
         if media_content is None:
             await ctx.edit(message=message_send, content="No content found or content is inappropriate.")
             return
-        media_file = interactions.File(media_content, file_name=f"media{ext}", description=tag)
+        media_file = interactions.File(media_content, file_name=f"media{ext}")
+        _tag = split_text(tag, 1024)
         embed = Embed(
             title="Search from e621",
             color=0x00ff00
@@ -32,8 +35,10 @@ class E621Search(Extension):
             url="https://github.com/Lorgar-Horusov/LWE_bot",
             icon_url="https://cdn.discordapp.com/avatars/1269739594736341227/160567261d976bdb1d4bd31745520b77"
         )
-        embed.add_field(
-            name='Tags',
-            value=f'> {tag}'
-        )
+        for idx, part in enumerate(_tag, 1):
+            if idx == 1:
+                name = f"Tags"
+            else:
+                name = " "
+            embed.add_field(name=name, value=part, inline=False)
         await ctx.edit(message=message_send, file=media_file, embed=embed)

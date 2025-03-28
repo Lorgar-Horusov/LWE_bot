@@ -18,6 +18,7 @@ class Fun(Extension):
         with open('giff_list.yaml', 'r') as file:
             self.gif_list = yaml.safe_load(file)
 
+
     @slash_command(
         name="bonk",
         description="Бонкнуть пользователя",
@@ -79,59 +80,139 @@ class Fun(Extension):
             await ctx.send("Пользователь не найден в этом сервере.")
 
 
-@slash_command(
-    name="hug",
-    description="Обнять пользователя",
-    options=[
-        {
-            "name": "user",
-            "description": "Пользователь, которого нужно обнять",
-            "type": 6,
-            "required": True
-        }
-    ]
-)
-async def hug(self, ctx: SlashContext, user):
-    if user.id == ctx.author.id:
-        await ctx.send("Вы не можете обнять сами себя.")
-        return
-    if user.id == ctx.guild.me.id:
-        embed = Embed(
-            title="Hug",
-            color=0x00ff00,
-        )
-        embed.set_author(
-            name='Legendary Web Enforcer',
-            url='https://github.com/Lorgar-Horusov/LWE_bot',
-            icon_url="https://cdn.discordapp.com/avatars/1269739594736341227/160567261d976bdb1d4bd31745520b77"
-        )
-        embed.add_field(
-            name=f"{ctx.author.display_name} обнял меня!",
-            value="<3",
-            inline=False
-        )
-        embed.set_image(
-            url=self.randomizer.choices(self.gif_list["hug_bot"])[0]
-        )
-        await ctx.send(embed=embed)
-        return
-    member = ctx.guild.get_member(user.id)
-    if member:
-        embed = Embed(
-            title="Hug",
-            color=0x00ff00,
-        )
-        embed.set_author(
-            name='Legendary Web Enforcer',
-            url='https://github.com/Lorgar-Horusov/LWE_bot',
-            icon_url="https://cdn.discordapp.com/avatars/1269739594736341227/160567261d976bdb1d4bd31745520b77"
-        )
-        embed.add_field(
-            name=f"{ctx.author.display_name} обнял {member.display_name}!",
-            value="<3",
-            inline=False
-        )
-        embed.set_image(
-            url=self.randomizer.choices(self.gif_list["hug"])[0]
-        )
-        await ctx.send(embed=embed)
+    @slash_command(
+        name="hug",
+        description="Обнять пользователя",
+        options=[
+            {
+                "name": "user",
+                "description": "Пользователь, которого нужно обнять",
+                "type": 6,
+                "required": True
+            }
+        ]
+    )
+    async def hug(self, ctx: SlashContext, user):
+        if user.id == ctx.author.id:
+            await ctx.send("Вы не можете обнять сами себя.")
+            return
+        if user.id == ctx.guild.me.id:
+            embed = Embed(
+                title="Hug",
+                color=0x00ff00,
+            )
+            embed.set_author(
+                name='Legendary Web Enforcer',
+                url='https://github.com/Lorgar-Horusov/LWE_bot',
+                icon_url="https://cdn.discordapp.com/avatars/1269739594736341227/160567261d976bdb1d4bd31745520b77"
+            )
+            embed.add_field(
+                name=f"{ctx.author.display_name} обнял меня!",
+                value="<3",
+                inline=False
+            )
+            embed.set_image(
+                url=self.randomizer.choices(self.gif_list["hug_bot"])[0]
+            )
+            await ctx.send(embed=embed)
+            return
+        member = ctx.guild.get_member(user.id)
+        if member:
+            embed = Embed(
+                title="Hug",
+                color=0x00ff00,
+            )
+            embed.set_author(
+                name='Legendary Web Enforcer',
+                url='https://github.com/Lorgar-Horusov/LWE_bot',
+                icon_url="https://cdn.discordapp.com/avatars/1269739594736341227/160567261d976bdb1d4bd31745520b77"
+            )
+            embed.add_field(
+                name=f"{ctx.author.display_name} обнял {member.display_name}!",
+                value="<3",
+                inline=False
+            )
+            embed.set_image(
+                url=self.randomizer.choices(self.gif_list["hug"])[0]
+            )
+            await ctx.send(embed=embed)
+
+    @slash_command(
+        name="kiss",
+        description="Поцеловать пользователя",
+        options=[
+            {
+                "name": "user",
+                "description": "Пользователь, которого нужно поцеловать",
+                "type": 6,
+                "required": True
+            }
+        ]
+    )
+    async def kiss(self, ctx: SlashContext, user):
+        if user.id == ctx.author.id:
+            await ctx.send("Вы не можете поцеловать сами себя.")
+            return
+        if user.id == ctx.guild.me.id:
+            await ctx.send("Ай ай ай, роботофилия это плохо.")
+            return
+        member = ctx.guild.get_member(user.id)
+        if member:
+            embed = Embed(
+                title="Kiss",
+                color=0x00ff00,
+            )
+            embed.set_author(
+                name='Legendary Web Enforcer',
+                url='https://github.com/Lorgar-Horusov/LWE_bot',
+                icon_url="https://cdn.discordapp.com/avatars/1269739594736341227/160567261d976bdb1d4bd31745520b77"
+            )
+            embed.add_field(
+                name=f"{ctx.author.display_name} поцеловал {member.display_name}!",
+                value=":3",
+                inline=False
+            )
+            embed.set_image(
+                url=self.randomizer.choices(self.gif_list["kiss"])[0]
+            )
+            await ctx.send(embed=embed)
+
+    @slash_command(
+        name="pat",
+        description="Погладить пользователя",
+        options=[
+            {
+                "name": "user",
+                "description": "Пользователь, которого нужно погладить",
+                "type": 6,
+                "required": True
+            }
+        ]
+    )
+    async def pat(self, ctx: SlashContext, user):
+        if user.id == ctx.author.id:
+            await ctx.send("Вы не можете погладить сами себя.")
+            return
+        if user.id == ctx.guild.me.id:
+            await ctx.send("Ай ай ай, роботофилия это плохо.")
+            return
+        member = ctx.guild.get_member(user.id)
+        if member:
+            embed = Embed(
+                title="Pat",
+                color=0x00ff00,
+            )
+            embed.set_author(
+                name='Legendary Web Enforcer',
+                url='https://github.com/Lorgar-Horusov/LWE_bot',
+                icon_url="https://cdn.discordapp.com/avatars/1269739594736341227/160567261d976bdb1d4bd31745520b77"
+            )
+            embed.add_field(
+                name=f"{ctx.author.display_name} погладил {member.display_name}!",
+                value=":3",
+                inline=False
+            )
+            embed.set_image(
+                url=self.randomizer.choices(self.gif_list["pat"])[0]
+            )
+            await ctx.send(embed=embed)

@@ -1,4 +1,6 @@
 modules:
+  achievement:
+    enabled: true
   book_search:
     enabled: true
     default_search_count: 3
@@ -23,7 +25,7 @@ modules:
     default_search_count: 3
 
   music:
-    enabled: true
+    enabled: false
 
   wishper:
     enabled: false
@@ -42,3 +44,25 @@ modules:
 
   fun:
     enabled: true
+
+  guard:
+    enabled: true
+    sensitivity: 10
+    message_limit: 3
+    time_limit: 10
+    whitelist:
+      - 'youtube.com'
+      - 'twitch.tv'
+      - 'twitch.com'
+      - 'online-fix.me'
+      - 'music.youtube.com'
+      - 'google.com'
+      - 'github.com'
+      - 'dreamerscast.com'
+      - 'hentailib.me'
+      - 'mangalib.me'
+      - 'ranobelib.me'
+      - 'freetp.org'
+      - 'ozon.ru'
+      - 'e621.net'
+      - 'youtu.be'

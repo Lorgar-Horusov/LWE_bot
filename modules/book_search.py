@@ -1,6 +1,6 @@
 from interactions import Extension
 from interactions import slash_command, SlashContext, slash_option
-from util.flibusta_api import search_books
+from util.flibusta_API import search_books
 from load_modules import load_config
 
 

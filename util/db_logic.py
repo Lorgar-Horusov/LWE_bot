@@ -1,8 +1,95 @@
 import sqlite3
 import datetime
 
+class AchievementsDataBase:
+    def __init__(self, db_path='LWE_DB'):
+        self.db_path = db_path
+        self._initialize_db()
 
-class ChatLogger():
+    def _initialize_db(self):
+
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+            CREATE TABLE IF NOT EXISTS achievements
+            (
+                id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                achievement TEXT NOT NULL,
+                description TEXT,
+                server_id TEXT NOT NULL
+            )
+            '''
+            )
+            conn.commit()
+
+    def add_achievement(self, user_id, achievement, description, server_id):
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute("INSERT INTO achievements (user_id, achievement, description, server_id) VALUES (?, ?, ?, ?)",
+                           (user_id, achievement, description, server_id))
+            conn.commit()
+
+    def get_achievements(self, user_id, server_id):
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT achievement FROM achievements WHERE user_id = ? AND server_id = ?", (user_id, server_id))
+            return cursor.fetchall()
+
+    def clear_achievements(self, user_id, server_id):
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM achievements WHERE user_id = ? AND server_id = ?", (user_id, server_id))
+            conn.commit()
+
+    def remove_achievement(self, user_id, achievement, server_id):
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM achievements WHERE user_id = ? AND achievement = ? AND server_id = ?", (user_id, achievement, server_id))
+            conn.commit()
+
+
+class ModerationDatabase:
+    def __init__(self, db_path='LWE_DB'):
+        self.db_path = db_path
+        self._initialize_db()
+
+    def _initialize_db(self):
+
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+            CREATE TABLE IF NOT EXISTS warns
+            (
+                id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                reason TEXT NOT NULL,
+                warn_date TEXT NOT NULL,
+                server_id TEXT NOT NULL
+            )
+            '''
+            )
+            conn.commit()
+    def add_warn(self, user_id, reason, server_id):
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute("INSERT INTO warns (user_id, reason, warn_date, server_id) VALUES (?, ?, ?, ?)",
+                           (user_id, reason, datetime.datetime.now().strftime('%d-%m-%Y'), server_id))
+            conn.commit()
+
+    def get_warns(self, user_id, server_id):
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT id, reason, warn_date FROM warns WHERE user_id = ? AND server_id = ?", (user_id, server_id))
+            return cursor.fetchall()
+
+    def delete_warn(self, user_id, server_id, warn_id):
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM warns WHERE user_id = ? AND server_id = ? AND id = ?", (user_id, server_id, warn_id))
+            conn.commit()
+
+class ChatLogger:
     def __init__(self, db_path='LWE_DB', max_records=50, retention_days=14):
         self.db_path = db_path
         self.max_records = max_records
@@ -34,6 +121,17 @@ class ChatLogger():
                     server_id INTEGER NOT NULL 
                 )
             ''')
+            cursor.execute('''
+            CREATE TABLE IF NOT EXISTS warns
+            (
+                id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                reason TEXT NOT NULL,
+                warn_date TEXT NOT NULL,
+                server_id INTEGER NOT NULL
+            )
+            '''
+            )
             conn.commit()
 
     def _check_and_delete_old_log(self, table_name):
@@ -84,8 +182,4 @@ class ChatLogger():
 
 
 if __name__ == '__main__':
-    logger = ChatLogger()
-    logger.message_deletion_logger('Lorgar', 'This is deleted message', 1)
-    logger.message_edition_logger('Lorgar', 'Original', 'Edited', 1)
-    print(logger.get_logs('deleted_messages', 1))
-    print(logger.get_logs('edited_messages', 1))
+    logger = ModerationDatabase()
