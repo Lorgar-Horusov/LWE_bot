@@ -9,8 +9,8 @@ plugins:
       - WEB
       - WEBEMBEDDED
     pot:
-      token: "Ijh86nzpGzvSTj-NCJ8qvjqFL78P3hitEJslkxWCT4kdxz6ANaE_jTa8KZI1rzuNPY0vnVnZOM9Prg=="
-      visitorData: "CgtuVTFoSUs4dGlqYyih3ca-BjIKCgJVUxIEGgAgSw%3D%3D"
+      token: ""
+      visitorData: ""
 lavalink:
   plugins:
 #    - dependency: "com.github.example:example-plugin:1.0.0" # required, the coordinates of your plugin
