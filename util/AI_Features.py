@@ -8,6 +8,8 @@ from rich.console import Console
 from rich.markdown import Markdown
 from numpy import dot
 from numpy.linalg import norm
+from pathlib import Path
+
 
 console = Console()
 CHAT_GPT_TOKEN = keyring.get_password('discord_bot', 'token_chatGPT')
@@ -17,31 +19,21 @@ if CHAT_GPT_TOKEN is None:
     CHAT_GPT_TOKEN = keyring.get_password('discord_bot', 'token_chatGPT')
 client = OpenAI(base_url='https://api.naga.ac/v1', api_key=CHAT_GPT_TOKEN)
 
-
-async def embedding_generate(text: str) -> List[float]:
-    text = text.replace("\n", " ")
-    response = client.embeddings.create(
-        input=[text],
-        model='text-embedding-ada-002',
-    )
-    return response.data[0].embedding
-
-def cosine_similarity(vector1, vector2):
-    return dot(vector1, vector2) / (norm(vector1) * norm(vector2))
-
-
-def need_update(new_embedding: List[float], old_embedding: List[float], threshold: float = 0.8):
-    if old_embedding is None:
-        return True
-    similarity = cosine_similarity(new_embedding, old_embedding)
-    return similarity < threshold
+BASE_DIR = Path(__file__).resolve().parent.parent
+attitude = 'sci_neko'
+attitude_file = BASE_DIR / "util" / "attitude" / f'{attitude}.txt'
 
 
 async def chat_gpt(prompt: str, model: str, tokens: int):
+    with open(attitude_file, 'r', encoding='utf-8') as file:
+        system_prompt = file.read()
     try:
         response = client.chat.completions.create(
             model=model,
-            messages=[{'role': 'user', 'content': prompt}],
+            messages=[
+                {'role': 'system', 'content': system_prompt},
+                {'role': 'user', 'content': prompt}
+            ],
             max_tokens=tokens
         )
         return response.choices[0].message.content
@@ -66,14 +58,13 @@ async def speach_to_text(audio_data: io.BytesIO) -> str:
     except Exception:
         console.print_exception(show_locals=True)
     finally:
-        # Удаляем временный файл
         os.remove(temp_file_name)
     text = transcription.text
     return text
 
 
 async def main():
-    respons = await chat_gpt('Привет, Дай небольшой скрипт на пайтон для построчного вывода текста', 'llama-3.3-70b-instruct', 100)
+    respons = await chat_gpt('Привет, Дай небольшой скрипт на пайтон для построчного вывода текста', 'gpt-5-mini-2025-08-07', 100)
     console.print(Markdown(respons))
 
 

@@ -6,19 +6,20 @@ modules:
     default_search_count: 3
 
   chat_gpt:
-    enabled: false
+    enabled: true
+    ephemeral: false
     max_tokens: 1000
-    model: llama-3.2-90b-vision-instruct
+    model: gpt-5-mini-2025-08-07:free
 
   e621_search:
     enabled: true
 
   img_gen:
     enabled: true
-    NSFW_filter: false
+    NSFW_filter: true
 
   logger:
-    enabled: false
+    enabled: true
 
   manga:
     enabled: false
@@ -47,7 +48,7 @@ modules:
 
   guard:
     enabled: true
-    sensitivity: 10
+    sensitivity: 1
     message_limit: 3
     time_limit: 10
     whitelist:
@@ -66,3 +67,8 @@ modules:
       - 'ozon.ru'
       - 'e621.net'
       - 'youtu.be'
+
+  analytics:
+    enabled: true
+    logs_interval: 5
+    max_entries: 20

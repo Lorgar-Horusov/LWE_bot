@@ -118,7 +118,6 @@ class Reports(Extension):
             last_message_id = messages[-1].id
 
             for msg in messages:
-                # Check if message is from either user and within the time range
                 message_time = msg.timestamp
                 if message_time < two_days_ago:
                     return collected_messages

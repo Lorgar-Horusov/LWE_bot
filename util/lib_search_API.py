@@ -1,52 +1,44 @@
 from pprint import pprint
-from playwright.async_api import async_playwright
+import httpx
+import asyncio
+
 
 async def search_manga(manga_name, count: int):
-    async with async_playwright() as p:
-        browser = await p.firefox.launch(headless=True)  # Безголовый режим
-        page = await browser.new_page()
-        answer = []
+    url = f"https://api2.mangalib.me/api/manga?fields[]=rate_avg&fields[]=rate&fields[]=releaseDate&q={manga_name}&site_id[]=1"
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url)
+        if response.status_code == 200:
+            json_data = response.json()
+            answer = []
 
-        # Перехватываем все запросы
-        async def handle_response(response):
-            if "application/json" in response.headers.get("content-type", ""):
-                try:
-                    json_data = await response.json()
-                    total_files = 0
+            # Проверяем структуру JSON
+            if isinstance(json_data, dict) and "data" in json_data:
+                manga_list = json_data["data"]
+            elif isinstance(json_data, list):
+                manga_list = json_data
+            else:
+                print("Неподдерживаемая структура данных.")
+                return []
 
-                    for item in json_data:
-                        manga_data = {
-                            "name": item.get("name"),
-                            "rus_name": item.get("rus_name"),
-                            "summary": item.get("summary"),
-                            "coverImage": item.get("coverImage"),
-                            "href": item.get("href")
-                        }
-                        answer.append(manga_data)
+            # Обрабатываем первые `count` элементов
+            for item in manga_list[:count]:
+                manga_data = {
+                    "name": item.get("name"),
+                    "rus_name": item.get("rus_name"),
+                    "coverImage": item['cover']['defaultuv '],
+                    "href": f"https://mangalib.me/ru/manga/{item.get('slug_url')}"
+                }
+                answer.append(manga_data)
 
-                        total_files += 1
-                        if total_files >= count:
-                            break
-
-                except Exception as e:
-                    print(f"Ошибка: {e}")
-
-        page.on("response", handle_response)
-
-        # Формируем URL для поиска манги
-        url = f"https://mangalib.me/search?type=manga&q={manga_name}"
-        await page.goto(url)
-
-        # Ждем загрузки страницы и выполнения всех скриптов
-        await page.wait_for_timeout(5000)
-
-        # Закрываем браузер
-        await browser.close()
-        return answer
-
+            return answer
+        else:
+            print(f"Ошибка при запросе: {response.status_code}")
+            return []
 
 if __name__ == '__main__':
-    manga_name = "one piece"
-    result = search_manga(manga_name)
-    result = result
-    pprint(result)
+    async def main():
+        manga_name = "one piece"
+        result = await search_manga(manga_name, count=1)
+        pprint(result)
+
+    asyncio.run(main())

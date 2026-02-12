@@ -1,4 +1,6 @@
 import asyncio
+
+import requests
 from openai import OpenAI
 import keyring
 from enum import Enum
@@ -49,6 +51,7 @@ async def download_image(image_url):
 class ImageGenerator:
     def __init__(self):
         self.base_url = "https://fluxai.pro/api/tools/fast"
+        self.naga_url = "https://api.naga.ac/v1/images/generations"
 
     async def generate_image(self, prompt):
         payload = {'prompt': prompt}
@@ -69,10 +72,10 @@ class ImageGenerator:
                 console.print_exception(show_locals=True)
                 return None
 
-    async def generate(self, prompt):
+    async def generate(self, prompt, model):
         try:
             start_time = time()
-            image_url = await self.generate_image(prompt)
+            image_url = await self.naga_image_generator(prompt, model)
             console.log(f"[green]Image generation took [red]{time() - start_time:.2f} [green]seconds\n [italic cyan]prompt: {prompt}")
             if image_url:
                 return await download_image(image_url)
@@ -82,10 +85,22 @@ class ImageGenerator:
             console.print_exception(show_locals=True)
             return None
 
+    async def naga_image_generator(self, prompt, model):
+        resp = client.images.generate(
+            model=model,
+            prompt=prompt,
+            size="1024x1024",
+            n=1,
+            response_format="url",  # or "b64_json"
+        )
+        return resp.data[0].url
+
+
+
 if __name__ == '__main__':
     async def main():
         image_generator = ImageGenerator()
-        image = await image_generator.generate('a cat')
+        image = await image_generator.generate(prompt='a cat', model="flux-1-schnell:free")
         print(image)
 
     asyncio.run(main())

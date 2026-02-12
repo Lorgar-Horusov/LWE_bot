@@ -3,7 +3,8 @@ from interactions import (
     Extension,
     SlashContext,
     slash_command,
-    Embed)
+    Embed,
+    SlashCommandChoice)
 import re
 from util.image_generation import ImageGenerator
 from load_modules import load_config
@@ -42,12 +43,24 @@ class ImageGeneration(Extension):
                 "description": "Что сгенерировать",
                 "type": 3,
                 "required": True
+            },
+            {
+                "name": "model",
+                "description": "Выберите модель",
+                "required": True,
+                "type": 3,
+                "choices": [
+                    SlashCommandChoice(name="dall-e-3", value='dall-e-3:free'),
+                    SlashCommandChoice(name="flux-1-schnell", value='flux-1-schnell:free'),
+                    SlashCommandChoice(name="kandinsky-3.1", value='kandinsky-3.1:free'),
+                    SlashCommandChoice(name="sdxl", value='sdxl:free'),
+                ]
             }
         ]
     )
-    async def image_generation(self, ctx: SlashContext, prompt):
+    async def image_generation(self, ctx: SlashContext, prompt, model='flux-1-schnell:free'):
         placeholder_msg = await ctx.send('Generating image')
-        image = await self.generator.generate(prompt)
+        image = await self.generator.generate(prompt, model)
         embed = Embed(
             title="Image Generator",
             color=0x00ff00,

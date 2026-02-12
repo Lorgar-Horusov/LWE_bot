@@ -4,7 +4,7 @@ from load_modules import load_module
 from tokken_setting import discord_token
 from rich.console import Console
 client = Client(
-    intents=Intents.DEFAULT | Intents.MESSAGE_CONTENT | Intents.GUILD_MODERATION,
+    intents=Intents.DEFAULT | Intents.MESSAGE_CONTENT | Intents.GUILD_MODERATION | Intents.GUILD_MEMBERS | Intents.GUILD_PRESENCES
 )
 console = Console()
 TOKEN = discord_token()

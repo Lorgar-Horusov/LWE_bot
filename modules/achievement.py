@@ -13,7 +13,6 @@ from interactions import (
     Modal,
     ShortText,
     ModalContext,
-    subcommand,
     SlashCommand,
 )
 from rich.console import Console

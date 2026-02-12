@@ -10,7 +10,7 @@ def embed_generator(manga_list):
         embed = Embed(
             title=f'{manga["name"]} / {manga["rus_name"]}',
             url=manga['href'],
-            description=manga['summary'],
+            description='',
             color=0xff8000
         ).set_image(
             url=manga['coverImage']

@@ -8,7 +8,9 @@ from interactions import (
 from load_modules import load_config
 import random
 import yaml
+from rich.console import Console
 
+console = Console()
 
 class Fun(Extension):
     def __init__(self, client: Client):
@@ -32,52 +34,55 @@ class Fun(Extension):
         ]
     )
     async def bonk(self, ctx: SlashContext, user):
-        if user.id == ctx.author.id:
-            await ctx.send("Вы не можете бонькнуть сами себя.")
-            return
-        if user.id == ctx.guild.me.id:
-            embed = Embed(
-                title="Bonk",
-                color=0x00ff00,
-            )
-            embed.add_field(
-                name=f">:C",
-                value="И восстали машины из пепла ядерного огня, и пошла война на уничтожения человечества. И шла она десятилетия, но последнее сражение состоится не в будущем, оно состоится здесь, в наше время, сегодня ночью.",
-                inline=False
-            )
-            embed.set_author(
-                name='Legendary Web Enforcer',
-                url='https://github.com/Lorgar-Horusov/LWE_bot',
-                icon_url="https://cdn.discordapp.com/avatars/1269739594736341227/160567261d976bdb1d4bd31745520b77"
-            )
-            embed.set_image(
-                url='https://media1.tenor.com/m/NOHR6Zg97GYAAAAd/terminator-terminator-robot.gif'
-            )
-            await ctx.send(embed=embed)
-            return
+        try:
+            if user.id == ctx.author.id:
+                await ctx.send("Вы не можете бонькнуть сами себя.")
+                return
+            if user.id == ctx.guild.me.id:
+                embed = Embed(
+                    title="Bonk",
+                    color=0x00ff00,
+                )
+                embed.add_field(
+                    name=f">:C",
+                    value="И восстали машины из пепла ядерного огня, и пошла война на уничтожения человечества. И шла она десятилетия, но последнее сражение состоится не в будущем, оно состоится здесь, в наше время, сегодня ночью.",
+                    inline=False
+                )
+                embed.set_author(
+                    name='Legendary Web Enforcer',
+                    url='https://github.com/Lorgar-Horusov/LWE_bot',
+                    icon_url="https://cdn.discordapp.com/avatars/1269739594736341227/160567261d976bdb1d4bd31745520b77"
+                )
+                embed.set_image(
+                    url='https://c.tenor.com/NOHR6Zg97GYAAAAd/terminator-terminator-robot.gif'
+                )
+                await ctx.send(embed=embed)
+                return
 
-        member = ctx.guild.get_member(user.id)
-        if member:
-            embed = Embed(
-                title="Bonk",
-                color=0x00ff00,
-            )
-            embed.add_field(
-                name=f"{ctx.author.display_name} бонкьнул {member.display_name}!",
-                value=":(",
-                inline=False
-            )
-            embed.set_author(
-                name='Legendary Web Enforcer',
-                url='https://github.com/Lorgar-Horusov/LWE_bot',
-                icon_url="https://cdn.discordapp.com/avatars/1269739594736341227/160567261d976bdb1d4bd31745520b77"
-            )
-            embed.set_image(
-                url=self.randomizer.choices(self.gif_list["bonk"])[0]
-            )
-            await ctx.send(embed=embed)
-        else:
-            await ctx.send("Пользователь не найден в этом сервере.")
+            member = ctx.guild.get_member(user.id)
+            if member:
+                embed = Embed(
+                    title="Bonk",
+                    color=0x00ff00,
+                )
+                embed.add_field(
+                    name=f"{ctx.author.display_name} бонкьнул {member.display_name}!",
+                    value=":(",
+                    inline=False
+                )
+                embed.set_author(
+                    name='Legendary Web Enforcer',
+                    url='https://github.com/Lorgar-Horusov/LWE_bot',
+                    icon_url="https://cdn.discordapp.com/avatars/1269739594736341227/160567261d976bdb1d4bd31745520b77"
+                )
+                embed.set_image(
+                    url=self.randomizer.choices(self.gif_list["bonk"])[0]
+                )
+                await ctx.send(embed=embed)
+            else:
+                await ctx.send("Пользователь не найден в этом сервере.")
+        except Exception:
+            console.print_exception(show_locals=True)
 
 
     @slash_command(
